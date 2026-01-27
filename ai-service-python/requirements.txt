@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+pymupdf
+google-generativeai
+python-dotenv
+requests
+scikit-learn
+beautifulsoup4
