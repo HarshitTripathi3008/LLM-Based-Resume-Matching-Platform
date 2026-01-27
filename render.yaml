@@ -3,9 +3,8 @@ services:
   - type: web
     name: resume-backend-node
     env: node
-    rootDir: backend-node
-    buildCommand: npm install
-    startCommand: node server.js
+    buildCommand: cd backend-node && npm install
+    startCommand: cd backend-node && node server.js
     envVars:
       - key: MONGO_URI
         sync: false
@@ -21,9 +20,8 @@ services:
   - type: web
     name: resume-ai-service
     env: python
-    rootDir: ai-service-python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: cd ai-service-python && pip install -r requirements.txt
+    startCommand: cd ai-service-python && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GEMINI_API_KEY
         sync: false
