@@ -1,0 +1,108 @@
+.resume-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 15px;
+}
+
+.badg {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.badg.completed {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+}
+
+.badg.processing {
+    background: rgba(255, 255, 0, 0.2);
+    color: #ffff00;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Match Results */
+.match-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.score-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(var(--secondary) calc(var(--percent) * 1%), rgba(255, 255, 255, 0.1) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.score-circle::after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: var(--bg-dark);
+    border-radius: 50%;
+}
+
+.score-circle span {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.match-info {
+    flex: 1;
+}
+
+.missing-keywords {
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

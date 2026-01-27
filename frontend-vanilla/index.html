@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Platform | Next-Gen Hiring</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/glass.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <div id="app" class="glass-container">
+        <!-- Navigation (Hidden on Login) -->
+        <nav id="navbar" class="hidden">
+            <div class="logo">🚀 AI ResumeMatch</div>
+            <div class="nav-links">
+                <a href="#" data-page="dashboard" class="active">Dashboard</a>
+                <a href="#" data-page="jobs">Jobs</a>
+                <a href="#" data-page="resumes">My Resumes</a>
+                <button id="logout-btn" class="btn-secondary">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- 1. Auth Page -->
+            <section id="auth-page" class="page active">
+                <div class="glass-card auth-card">
+                    <h1>Welcome Back</h1>
+                    <p class="subtitle">Enter the future of hiring.</p>
+                    
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn-primary glow">Login</button>
+                        <p class="switch-auth">New here? <a href="#" id="show-register">Create Account</a></p>
+                    </form>
+
+                    <form id="register-form" class="hidden">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="reg-name" placeholder="John Doe" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="reg-email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="reg-password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn-primary glow">Register</button>
+                        <p class="switch-auth">Already have an account? <a href="#" id="show-login">Login</a></p>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 2. Dashboard Page -->
+            <section id="dashboard-page" class="page hidden">
+                <header class="page-header">
+                    <h2>Dashboard</h2>
+                    <button id="upload-new-resume" class="btn-primary">+ Upload Resume</button>
+                </header>
+                
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <h3>Total Resumes</h3>
+                        <p class="stat-number" id="stat-resumes">0</p>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <h3>Active Jobs</h3>
+                        <p class="stat-number" id="stat-jobs">0</p>
+                    </div>
+                </div>
+
+                <h3>Recent Uploads</h3>
+                <div class="resume-list" id="dashboard-resume-list">
+                    <!-- Loaded via JS -->
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- 3. Jobs Page -->
+            <section id="jobs-page" class="page hidden">
+                <header class="page-header">
+                    <h2>Job Board</h2>
+                    <div class="actions">
+                        <button id="create-job-btn" class="btn-primary">Create Job</button>
+                    </div>
+                </header>
+                <div class="job-grid" id="job-list">
+                    <!-- Loaded via JS -->
+                </div>
+            </section>
+            
+             <!-- 4. Job Match View -->
+            <section id="match-page" class="page hidden">
+                <header class="page-header">
+                    <button class="btn-back">← Back</button>
+                    <h2 id="match-job-title">Job Title Candidates</h2>
+                </header>
+                <div class="candidates-list" id="match-results">
+                     <!-- Loaded via JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="upload-modal" class="modal hidden">
+        <div class="glass-card modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Upload Resume</h2>
+            <div class="drop-zone" id="drop-zone">
+                <p>Drag & Drop PDF here</p>
+                <input type="file" id="resume-file" accept=".pdf,.docx" hidden>
+                <button class="btn-secondary" onclick="document.getElementById('resume-file').click()">Browse Files</button>
+            </div>
+            <div id="upload-progress" class="hidden">
+                <p>AI Processing...</p>
+                <div class="progress-bar"><div class="fill"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
