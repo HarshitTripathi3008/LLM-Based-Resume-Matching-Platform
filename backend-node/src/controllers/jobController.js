@@ -2,7 +2,10 @@ const Resume = require('../models/Resume');
 const axios = require('axios');
 
 // AI Service URL
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+let AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+if (!AI_SERVICE_URL.startsWith('http')) {
+    AI_SERVICE_URL = `http://${AI_SERVICE_URL}`;
+}
 
 // @desc    Create a new job (Manual or Scraped)
 // @route   POST /api/jobs

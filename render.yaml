@@ -15,7 +15,7 @@ services:
         fromService:
           type: web
           name: resume-ai-service
-          property: url
+          property: hostport
 
   # 2. Python AI Service
   - type: web
