@@ -1,3 +1,4 @@
+const Job = require('../models/Job');
 const Resume = require('../models/Resume');
 const axios = require('axios');
 
