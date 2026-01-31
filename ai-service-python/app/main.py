@@ -26,25 +26,50 @@ def process_resume(request: ResumeRequest):
     and returns structured data using LLM.
     """
     file_path = request.file_path
+    temp_file = None
     
-    # Check if file exists
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail=f"File not found at {file_path}")
+    try:
+        # Check if file_path is a URL
+        if file_path.startswith(('http://', 'https://')):
+            import requests
+            import tempfile
+            
+            # Download file
+            response = requests.get(file_path)
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail="Failed to download file from URL")
+            
+            # Create temp file
+            temp_fd, temp_path = tempfile.mkstemp(suffix=".pdf") # Assuming PDF for now, or detect from URL
+            with os.fdopen(temp_fd, 'wb') as tmp:
+                tmp.write(response.content)
+            
+            file_path = temp_path
+            temp_file = temp_path
         
-    # Extract Text
-    text = extract_text_from_pdf(file_path)
-    
-    if not text:
-        raise HTTPException(status_code=500, detail="Failed to extract text from PDF")
-    
-    # Analyze with LLM
-    analysis = analyze_resume_text(text)
+        # Check if file exists (local or downloaded temp)
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail=f"File not found at {file_path}")
+            
+        # Extract Text
+        text = extract_text_from_pdf(file_path)
         
-    return {
-        "success": True, 
-        "text_preview": text[:200],
-        "data": analysis
-    }
+        if not text:
+            raise HTTPException(status_code=500, detail="Failed to extract text from PDF")
+        
+        # Analyze with LLM
+        analysis = analyze_resume_text(text)
+            
+        return {
+            "success": True, 
+            "text_preview": text[:200],
+            "data": analysis
+        }
+        
+    finally:
+        # Cleanup temp file if it was created
+        if temp_file and os.path.exists(temp_file):
+            os.remove(temp_file)
 
 # --- New Phase 4 Endpoints ---
 

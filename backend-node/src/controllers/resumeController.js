@@ -21,23 +21,21 @@ exports.uploadResume = async (req, res) => {
         }
 
         // 1. Create initial record
+        const filePath = req.file.location || req.file.path; // S3 location or local path
+
         let resume = await Resume.create({
             user: req.user.id,
-            fileName: req.file.filename,
-            filePath: req.file.path,
+            fileName: req.file.key || req.file.filename, // S3 key or local filename
+            filePath: filePath,
             originalName: req.file.originalname,
             mimeType: req.file.mimetype,
             status: 'processing'
         });
 
         // 2. Call Python Service
-        // We need to send the ABSOLUTE path or ensuring Python can access it.
-        // Since both are local, we can send the full path.
-        const fullPath = path.resolve(req.file.path);
-
         try {
             const aiResponse = await axios.post(`${AI_SERVICE_URL}/process-resume`, {
-                file_path: fullPath
+                file_path: filePath
             });
 
             if (aiResponse.data.success) {

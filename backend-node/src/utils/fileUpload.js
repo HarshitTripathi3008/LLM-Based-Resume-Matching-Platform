@@ -1,16 +1,7 @@
 const multer = require('multer');
 const path = require('path');
-
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        // file_fieldname-timestamp.ext
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+const multerS3 = require('multer-s3');
+const s3 = require('../config/s3Config');
 
 // Check file type
 function checkFileType(file, cb) {
@@ -29,6 +20,20 @@ function checkFileType(file, cb) {
         cb('Error: Resumes Only (PDF, DOC, DOCX)!');
     }
 }
+
+// Set storage engine
+const storage = multerS3({
+    s3: s3,
+    bucket: process.env.AWS_BUCKET_NAME,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    metadata: function (req, file, cb) {
+        cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+        // file_fieldname-timestamp.ext
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
 
 // Init Upload
 const upload = multer({
