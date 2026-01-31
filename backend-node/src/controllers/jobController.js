@@ -133,7 +133,14 @@ exports.getRecommendedJobs = async (req, res) => {
         }
 
         // Use rawText or parsed data
-        const resumeText = resume.rawText || JSON.stringify(resume.parsedData);
+        let resumeText = resume.rawText || "";
+        if (!resumeText && resume.parsedData) {
+            resumeText = JSON.stringify(resume.parsedData);
+        }
+
+        if (!resumeText || resumeText.length < 10) {
+            return res.status(400).json({ success: false, error: 'Resume text is empty. Please re-upload resume.' });
+        }
 
         // Call Python Service
         const response = await axios.post(`${AI_SERVICE_URL}/recommend-jobs`, {
@@ -147,7 +154,14 @@ exports.getRecommendedJobs = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Recommendation Error:", error.message);
-        res.status(500).json({ success: false, error: 'Failed to get recommendations' });
+        const errorMsg = error.response?.data?.detail || error.message;
+        console.error("Recommendation Error:", errorMsg);
+
+        // Check if it's a connection error (Python service down)
+        if (error.code === 'ECONNREFUSED' || error.response?.status === 502) {
+            return res.status(503).json({ success: false, error: 'AI Service is currently unavailable. Please try again in a minute.' });
+        }
+
+        res.status(500).json({ success: false, error: 'Failed to get recommendations: ' + errorMsg });
     }
 };
