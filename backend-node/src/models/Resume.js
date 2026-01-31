@@ -46,6 +46,9 @@ const resumeSchema = new mongoose.Schema({
         enum: ['uploaded', 'processing', 'completed', 'failed'],
         default: 'uploaded'
     },
+    failureReason: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

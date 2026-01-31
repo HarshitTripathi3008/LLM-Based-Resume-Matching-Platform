@@ -67,10 +67,15 @@ exports.uploadResume = async (req, res) => {
             }
         } catch (aiError) {
             console.error("AI Processing Failed:", aiError.message);
-            if (aiError.response) {
+            // Default error
+            let reason = aiError.message;
+            // Detailed axios error
+            if (aiError.response && aiError.response.data) {
                 console.error("AI Response Data:", aiError.response.data);
+                reason = JSON.stringify(aiError.response.data);
             }
             resume.status = 'failed';
+            resume.failureReason = reason;
             await resume.save();
             // We don't fail the request, just the processing status
         }

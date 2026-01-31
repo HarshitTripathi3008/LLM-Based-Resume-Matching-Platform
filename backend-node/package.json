@@ -22,6 +22,7 @@
   "homepage": "https://github.com/HarshitTripathi3008/LLM-Based-Resume-Matching-Platform#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.980.0",
+    "@aws-sdk/s3-request-presigner": "^3.980.0",
     "axios": "^1.13.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
