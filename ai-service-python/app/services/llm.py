@@ -18,7 +18,7 @@ def analyze_resume_text(text: str) -> dict:
         return {"error": "Gemini API Key is missing or invalid in .env"}
 
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash-lite-001')
         
         prompt = f"""
         You are an expert HR AI. Extract structured data from the following resume text.
@@ -64,7 +64,7 @@ def extract_search_criteria(text: str) -> dict:
         return {"error": "Gemini API Key is missing on Server"}
 
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash-lite-001')
         
         prompt = f"""
         You are a job search assistant. Analyze the resume text below and extract:
