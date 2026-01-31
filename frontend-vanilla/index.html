@@ -99,14 +99,19 @@
                     <!-- Loaded via JS -->
                     <div class="loading-spinner"></div>
                 </div>
+            </section>
 
-                <h3>AI Recommended Jobs (External) 🌍</h3>
-                <div id="external-jobs-container" class="job-grid">
-                    <p>Loading recommendations based on your resume...</p>
+            <!-- 3. My Resumes Page -->
+            <section id="resumes-page" class="page hidden">
+                <header class="page-header">
+                    <h2>My Resumes</h2>
+                </header>
+                <div id="resumes-list-container" class="resume-list-full">
+                    <!-- Loaded via JS -->
                 </div>
             </section>
 
-            <!-- 3. Jobs Page -->
+            <!-- 4. Jobs Page -->
             <section id="jobs-page" class="page hidden">
                 <header class="page-header">
                     <h2>Job Board</h2>
@@ -114,7 +119,14 @@
                         <button id="create-job-btn" class="btn-primary">Create Job</button>
                     </div>
                 </header>
+
+                <h3>Internal Jobs</h3>
                 <div class="job-grid" id="job-list">
+                    <!-- Loaded via JS -->
+                </div>
+
+                <h3 style="margin-top: 40px;">External Recommendations 🌍</h3>
+                <div class="job-grid" id="external-jobs-container">
                     <!-- Loaded via JS -->
                 </div>
             </section>

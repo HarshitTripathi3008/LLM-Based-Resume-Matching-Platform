@@ -51,5 +51,8 @@ export const api = {
     matchJob: (id) => request(`/jobs/${id}/match`),
 
     // External AI Jobs
-    getRecommendedJobs: (resumeId) => request('/jobs/recommend', 'POST', { resumeId })
+    getRecommendedJobs: (resumeId) => request('/jobs/recommend', 'POST', { resumeId }),
+
+    // Delete
+    deleteResume: (id) => request(`/resumes/${id}`, 'DELETE')
 };

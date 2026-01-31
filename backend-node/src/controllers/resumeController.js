@@ -107,3 +107,50 @@ exports.getResumeById = async (req, res) => {
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
+
+// @desc    Delete resume
+// @route   DELETE /api/resumes/:id
+// @access  Private
+exports.deleteResume = async (req, res) => {
+    try {
+        const resume = await Resume.findById(req.params.id);
+
+        if (!resume) {
+            return res.status(404).json({ success: false, error: 'Resume not found' });
+        }
+
+        // Ensure user owns the resume
+        if (resume.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(401).json({ success: false, error: 'Not authorized' });
+        }
+
+        // Delete from S3
+        const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+        const s3 = require('../config/s3Config');
+
+        // Extract Key from fileName or filePath (assuming fileName stored is the key or part of it)
+        // In uploadResume we saved: fileName: req.file.key || req.file.filename
+        // S3 Multer usually stores the key in req.file.key
+        if (resume.fileName) {
+            try {
+                const deleteParams = {
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: resume.fileName
+                };
+                await s3.send(new DeleteObjectCommand(deleteParams));
+            } catch (s3Error) {
+                console.error("S3 Delete Error:", s3Error);
+                // Continue to delete from DB even if S3 fails? 
+                // Usually yes, or user can't ever delete the record.
+            }
+        }
+
+        await resume.deleteOne();
+
+        res.status(200).json({ success: true, data: {}, message: 'Resume deleted successfully' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Server Error' });
+    }
+};

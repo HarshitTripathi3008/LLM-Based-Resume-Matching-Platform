@@ -12,6 +12,7 @@ const pages = {
     auth: document.getElementById('auth-page'),
     dashboard: document.getElementById('dashboard-page'),
     jobs: document.getElementById('jobs-page'),
+    resumes: document.getElementById('resumes-page'),
     match: document.getElementById('match-page')
 };
 
@@ -80,13 +81,14 @@ async function loadDashboardData() {
         document.getElementById('stat-resumes').innerText = state.resumes.length;
         document.getElementById('stat-jobs').innerText = state.jobs.length;
 
-        renderResumeList();
+        renderResumeList(); // Dashboard list
 
-        // Fetch Recommendations if resumes exist
+        // Fetch Recommendations if resumes exist (Populates container in Jobs Page)
         if (state.resumes.length > 0) {
             loadRecommendedJobs(state.resumes[0]._id);
         } else {
-            document.getElementById('external-jobs-container').innerHTML = '<p>Upload a resume to get external job recommendations.</p>';
+            const container = document.getElementById('external-jobs-container');
+            if (container) container.innerHTML = '<p>Upload a resume to get external job recommendations.</p>';
         }
 
     } catch (e) {
@@ -96,6 +98,7 @@ async function loadDashboardData() {
 
 async function loadRecommendedJobs(resumeId) {
     const container = document.getElementById('external-jobs-container');
+    if (!container) return;
     container.innerHTML = '<div class="loading-spinner"></div>';
 
     try {
@@ -106,8 +109,11 @@ async function loadRecommendedJobs(resumeId) {
         }
 
         container.innerHTML = res.data.map(job => `
-            <div class="glass-card job-item">
-                <h3>${job.title}</h3>
+            <div class="glass-card job-item external-job">
+                <div class="job-header">
+                    <h3>${job.title}</h3>
+                    <span class="badge-external">External</span>
+                </div>
                 <p class="company">${job.company}</p>
                 <p class="desc">${job.description}</p>
                 <div class="actions">
@@ -123,14 +129,36 @@ async function loadRecommendedJobs(resumeId) {
 
 // --- Rendering ---
 function renderResumeList() {
+    // Dashboard Mini List
     const list = document.getElementById('dashboard-resume-list');
-    list.innerHTML = state.resumes.map(r => `
+    list.innerHTML = state.resumes.slice(0, 3).map(r => `
         <div class="glass-card resume-item">
             <div>
                 <h4>${r.originalName}</h4>
                 <small>${new Date(r.createdAt).toLocaleDateString()}</small>
             </div>
             <span class="badg ${r.status}">${r.status}</span>
+        </div>
+    `).join('');
+}
+
+function renderMyResumesPage() {
+    const list = document.getElementById('resumes-list-container');
+    if (state.resumes.length === 0) {
+        list.innerHTML = '<p>No resumes uploaded yet.</p>';
+        return;
+    }
+
+    list.innerHTML = state.resumes.map((r, index) => `
+        <div class="glass-card resume-item full-width">
+            <div class="resume-info">
+                <h4>${r.originalName} ${index === 0 ? '<span class="badge-new">Latest</span>' : ''}</h4>
+                <small>Uploaded: ${new Date(r.createdAt).toLocaleString()}</small>
+            </div>
+            <div class="resume-actions">
+                <span class="badg ${r.status}">${r.status}</span>
+                <button class="btn-danger btn-sm" onclick="app.deleteResume('${r._id}')">Delete</button>
+            </div>
         </div>
     `).join('');
 }
@@ -179,6 +207,19 @@ window.app = {
         } catch (e) {
             container.innerHTML = `<p class="error">Error: ${e.message}</p>`;
         }
+    },
+
+    deleteResume: async (id) => {
+        if (!confirm('Are you sure? This cannot be undone.')) return;
+        try {
+            await api.deleteResume(id);
+            // Refresh data
+            await loadDashboardData();
+            // Re-render current view if on resumes page
+            renderMyResumesPage();
+        } catch (e) {
+            alert(e.message);
+        }
     }
 };
 
@@ -192,6 +233,7 @@ function setupEventListeners() {
             navigate(page);
             if (page === 'dashboard') loadDashboardData();
             if (page === 'jobs') { renderJobList(); }
+            if (page === 'resumes') { renderMyResumesPage(); }
         });
     });
 

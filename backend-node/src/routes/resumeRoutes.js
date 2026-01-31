@@ -11,5 +11,6 @@ router.use(protect);
 router.post('/upload', upload.single('resume'), uploadResume);
 router.get('/', getMyResumes);
 router.get('/:id', getResumeById);
+router.delete('/:id', require('../controllers/resumeController').deleteResume);
 
 module.exports = router;
