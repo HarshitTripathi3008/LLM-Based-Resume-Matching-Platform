@@ -74,7 +74,7 @@ def process_resume(request: ResumeRequest):
 # --- New Phase 4 Endpoints ---
 
 from app.services.matcher import calculate_match_score
-from app.services.scraper import scrape_job_description, mock_scrape_job_portal
+from app.services.scraper import scrape_job_description
 
 class JobMatchRequest(BaseModel):
     resume_text: str
