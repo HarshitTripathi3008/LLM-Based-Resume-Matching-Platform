@@ -95,4 +95,14 @@ def extract_search_criteria(text: str) -> dict:
         
     except Exception as e:
         print(f"LLM Search Criteria Error: {e}")
-        return {"error": f"LLM Generation Failed: {str(e)}"}
+        
+        # Try to list available models to help debugging
+        try:
+            available = []
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    available.append(m.name)
+            
+            return {"error": f"LLM Failed. Error: {str(e)}. AVAILABLE MODELS: {', '.join(available)}"}
+        except Exception as list_err:
+             return {"error": f"LLM Failed: {str(e)}. Also failed to list models: {str(list_err)}"}
