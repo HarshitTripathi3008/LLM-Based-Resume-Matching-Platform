@@ -34,8 +34,25 @@ exports.uploadResume = async (req, res) => {
 
         // 2. Call Python Service
         try {
+            let processingUrl = filePath;
+
+            // If using S3, generate a signed URL for variables
+            if (req.file.key) {
+                const { GetObjectCommand } = require('@aws-sdk/client-s3');
+                const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+                const s3 = require('../config/s3Config');
+
+                const command = new GetObjectCommand({
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: req.file.key,
+                });
+
+                // Url valid for 5 minutes
+                processingUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+            }
+
             const aiResponse = await axios.post(`${AI_SERVICE_URL}/process-resume`, {
-                file_path: filePath
+                file_path: processingUrl
             });
 
             if (aiResponse.data.success) {
@@ -50,6 +67,9 @@ exports.uploadResume = async (req, res) => {
             }
         } catch (aiError) {
             console.error("AI Processing Failed:", aiError.message);
+            if (aiError.response) {
+                console.error("AI Response Data:", aiError.response.data);
+            }
             resume.status = 'failed';
             await resume.save();
             // We don't fail the request, just the processing status
