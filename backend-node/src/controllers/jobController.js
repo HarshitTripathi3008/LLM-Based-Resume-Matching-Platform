@@ -4,8 +4,8 @@ const axios = require('axios');
 
 // AI Service URL
 let AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
-if (!AI_SERVICE_URL.startsWith('http')) {
-    AI_SERVICE_URL = `http://${AI_SERVICE_URL}`;
+if (AI_SERVICE_URL.endsWith('/')) {
+    AI_SERVICE_URL = AI_SERVICE_URL.slice(0, -1);
 }
 
 // @desc    Create a new job (Manual or Scraped)
