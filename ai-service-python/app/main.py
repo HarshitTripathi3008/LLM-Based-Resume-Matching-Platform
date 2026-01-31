@@ -17,7 +17,7 @@ class ResumeRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "AI Service is running"}
+    return {"message": "AI Service is running", "version": "feature-job-search-v1"}
 
 @app.post("/process-resume")
 def process_resume(request: ResumeRequest):
