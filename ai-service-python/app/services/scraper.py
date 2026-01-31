@@ -35,25 +35,41 @@ def scrape_job_description(url: str) -> str:
         print(f"Scraping Error: {e}")
         return ""
 
-def mock_scrape_job_portal(role: str) -> list:
+from googlesearch import search
+import time
+
+def search_external_jobs(query: str, limit: int = 5) -> list:
     """
-    Mock function to simulate searching for jobs on a portal.
-    In production, this would use Playwright to search LinkedIn/Indeed.
+    Searches Google for job postings matching the query.
+    Returns a list of job objects.
     """
-    # Mock Data for demonstration
-    return [
-        {
-            "id": "job_101",
-            "title": f"Senior {role} Developer",
-            "company": "Tech Corp",
-            "description": f"We are looking for a {role} expert with Node.js and Python experience...",
-            "url": "https://example.com/job/101"
-        },
-        {
-            "id": "job_102",
-            "title": f"Junior {role} Engineer",
-            "company": "Startup Inc",
-            "description": "Entry level role. Must know algorithms and data structures.",
-            "url": "https://example.com/job/102"
-        }
-    ]
+    results = []
+    try:
+        # Perform Google Search
+        # advanced=True returns SearchResult objects with title, description, url
+        search_results = search(query, num_results=limit, advanced=True)
+        
+        for res in search_results:
+            results.append({
+                "id": str(hash(res.url)),
+                "title": res.title,
+                "company": "External Source", # Hard to parse from Google title reliably without NLP
+                "description": res.description,
+                "url": res.url,
+                "source": "Google Search"
+            })
+            
+    except Exception as e:
+        print(f"Google Search Error: {e}")
+        # Fallback to mock data if quota exceeded or error
+        return [
+            {
+                "id": "err_1",
+                "title": "Error fetching real jobs",
+                "company": "System",
+                "description": "Please try again later. Google Search limit may have been reached.",
+                "url": "#"
+            }
+        ]
+        
+    return results

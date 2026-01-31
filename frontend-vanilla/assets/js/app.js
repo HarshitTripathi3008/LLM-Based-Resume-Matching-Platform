@@ -81,8 +81,43 @@ async function loadDashboardData() {
         document.getElementById('stat-jobs').innerText = state.jobs.length;
 
         renderResumeList();
+
+        // Fetch Recommendations if resumes exist
+        if (state.resumes.length > 0) {
+            loadRecommendedJobs(state.resumes[0]._id);
+        } else {
+            document.getElementById('external-jobs-container').innerHTML = '<p>Upload a resume to get external job recommendations.</p>';
+        }
+
     } catch (e) {
         console.error(e);
+    }
+}
+
+async function loadRecommendedJobs(resumeId) {
+    const container = document.getElementById('external-jobs-container');
+    container.innerHTML = '<div class="loading-spinner"></div>';
+
+    try {
+        const res = await api.getRecommendedJobs(resumeId);
+        if (res.data.length === 0) {
+            container.innerHTML = '<p>No external jobs found.</p>';
+            return;
+        }
+
+        container.innerHTML = res.data.map(job => `
+            <div class="glass-card job-item">
+                <h3>${job.title}</h3>
+                <p class="company">${job.company}</p>
+                <p class="desc">${job.description}</p>
+                <div class="actions">
+                    <a href="${job.url}" target="_blank" class="btn-secondary btn-sm">Apply on ${job.source}</a>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        container.innerHTML = `<p class="error">Failed to load recommendations: ${err.message}</p>`;
     }
 }
 
@@ -206,6 +241,57 @@ function setupEventListeners() {
     document.getElementById('show-login').addEventListener('click', () => {
         document.getElementById('register-form').classList.add('hidden');
         document.getElementById('login-form').classList.remove('hidden');
+    });
+
+    // --- Upload Modal ---
+    const uploadModal = document.getElementById('upload-modal');
+
+    // Open Modal
+    document.getElementById('upload-new-resume').addEventListener('click', () => {
+        uploadModal.classList.remove('hidden');
+    });
+
+    // Close Modal
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        uploadModal.classList.add('hidden');
+    });
+
+    // Close on click outside
+    window.addEventListener('click', (e) => {
+        if (e.target == uploadModal) {
+            uploadModal.classList.add('hidden');
+        }
+    });
+
+    // File Upload Handler
+    document.getElementById('resume-file').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Show Progress
+        document.getElementById('drop-zone').classList.add('hidden');
+        document.getElementById('upload-progress').classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('resume', file); // Field name must match backend 'resume'
+
+            // Call API
+            await api.uploadResume(formData);
+
+            // Success
+            alert('Resume Uploaded Successfully!');
+            uploadModal.classList.add('hidden');
+            loadDashboardData(); // Refresh list
+
+        } catch (err) {
+            alert('Upload Failed: ' + err.message);
+        } finally {
+            // Reset Modal
+            document.getElementById('drop-zone').classList.remove('hidden');
+            document.getElementById('upload-progress').classList.add('hidden');
+            e.target.value = ''; // Reset input
+        }
     });
 }
 

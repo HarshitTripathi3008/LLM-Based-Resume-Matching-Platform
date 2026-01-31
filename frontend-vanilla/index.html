@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume Platform | Next-Gen Hiring</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/glass.css">
     <link rel="stylesheet" href="assets/css/components.css">
 </head>
+
 <body>
     <div class="background-globes">
         <div class="globe globe-1"></div>
@@ -40,7 +43,7 @@
                 <div class="glass-card auth-card">
                     <h1>Welcome Back</h1>
                     <p class="subtitle">Enter the future of hiring.</p>
-                    
+
                     <form id="login-form">
                         <div class="input-group">
                             <label>Email</label>
@@ -79,7 +82,7 @@
                     <h2>Dashboard</h2>
                     <button id="upload-new-resume" class="btn-primary">+ Upload Resume</button>
                 </header>
-                
+
                 <div class="stats-grid">
                     <div class="glass-card stat-card">
                         <h3>Total Resumes</h3>
@@ -96,6 +99,11 @@
                     <!-- Loaded via JS -->
                     <div class="loading-spinner"></div>
                 </div>
+
+                <h3>AI Recommended Jobs (External) 🌍</h3>
+                <div id="external-jobs-container" class="job-grid">
+                    <p>Loading recommendations based on your resume...</p>
+                </div>
             </section>
 
             <!-- 3. Jobs Page -->
@@ -110,15 +118,15 @@
                     <!-- Loaded via JS -->
                 </div>
             </section>
-            
-             <!-- 4. Job Match View -->
+
+            <!-- 4. Job Match View -->
             <section id="match-page" class="page hidden">
                 <header class="page-header">
                     <button class="btn-back">← Back</button>
                     <h2 id="match-job-title">Job Title Candidates</h2>
                 </header>
                 <div class="candidates-list" id="match-results">
-                     <!-- Loaded via JS -->
+                    <!-- Loaded via JS -->
                 </div>
             </section>
 
@@ -133,15 +141,19 @@
             <div class="drop-zone" id="drop-zone">
                 <p>Drag & Drop PDF here</p>
                 <input type="file" id="resume-file" accept=".pdf,.docx" hidden>
-                <button class="btn-secondary" onclick="document.getElementById('resume-file').click()">Browse Files</button>
+                <button class="btn-secondary" onclick="document.getElementById('resume-file').click()">Browse
+                    Files</button>
             </div>
             <div id="upload-progress" class="hidden">
                 <p>AI Processing...</p>
-                <div class="progress-bar"><div class="fill"></div></div>
+                <div class="progress-bar">
+                    <div class="fill"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module" src="assets/js/app.js"></script>
 </body>
+
 </html>

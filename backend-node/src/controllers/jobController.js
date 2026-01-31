@@ -119,3 +119,35 @@ exports.matchCandidates = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+// @desc    Get AI Recommended external jobs
+// @route   POST /api/jobs/recommend
+// @access  Private
+exports.getRecommendedJobs = async (req, res) => {
+    try {
+        const { resumeId } = req.body;
+
+        const resume = await Resume.findById(resumeId);
+        if (!resume) {
+            return res.status(404).json({ success: false, error: 'Resume not found' });
+        }
+
+        // Use rawText or parsed data
+        const resumeText = resume.rawText || JSON.stringify(resume.parsedData);
+
+        // Call Python Service
+        const response = await axios.post(`${AI_SERVICE_URL}/recommend-jobs`, {
+            resume_text: resumeText
+        });
+
+        res.status(200).json({
+            success: true,
+            criteria: response.data.criteria,
+            data: response.data.data
+        });
+
+    } catch (error) {
+        console.error("Recommendation Error:", error.message);
+        res.status(500).json({ success: false, error: 'Failed to get recommendations' });
+    }
+};

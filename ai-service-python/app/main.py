@@ -101,6 +101,38 @@ def scrape_job(request: JobScrapeRequest):
          raise HTTPException(status_code=400, detail="Failed to scrape content")
     return {"success": True, "data": content}
 
+# --- Phase 5: External Job Recommendations ---
+from app.services.llm import extract_search_criteria
+from app.services.scraper import search_external_jobs
+
+class RecommendJobsRequest(BaseModel):
+    resume_text: str
+
+@app.post("/recommend-jobs")
+def recommend_jobs(request: RecommendJobsRequest):
+    """
+    1. Analyzes resume to find search criteria (role, level, skills).
+    2. Searches Google for relevant jobs.
+    3. Returns list of links.
+    """
+    # 1. Extract Criteria
+    criteria = extract_search_criteria(request.resume_text)
+    
+    if not criteria or "query" not in criteria:
+        # Fallback if LLM fails
+        query = "Software Engineer jobs"
+    else:
+        query = criteria["query"]
+        
+    # 2. Search Google
+    jobs = search_external_jobs(query, limit=10)
+    
+    return {
+        "success": True,
+        "criteria": criteria,
+        "data": jobs
+    }
+
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

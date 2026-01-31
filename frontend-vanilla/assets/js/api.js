@@ -46,6 +46,10 @@ export const api = {
 
     // Jobs
     createJob: (data) => request('/jobs', 'POST', data),
+    createJob: (data) => request('/jobs', 'POST', data),
     getJobs: () => request('/jobs'),
-    matchJob: (id) => request(`/jobs/${id}/match`)
+    matchJob: (id) => request(`/jobs/${id}/match`),
+
+    // External AI Jobs
+    getRecommendedJobs: (resumeId) => request('/jobs/recommend', 'POST', { resumeId })
 };
