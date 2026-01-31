@@ -61,7 +61,7 @@ def extract_search_criteria(text: str) -> dict:
     Returns: { "experience_level": str, "domain": str, "top_skills": list, "query": str }
     """
     if not api_key:
-        return {}
+        return {"error": "Gemini API Key is missing on Server"}
 
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
@@ -95,4 +95,4 @@ def extract_search_criteria(text: str) -> dict:
         
     except Exception as e:
         print(f"LLM Search Criteria Error: {e}")
-        return {}
+        return {"error": f"LLM Generation Failed: {str(e)}"}

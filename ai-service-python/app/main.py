@@ -116,10 +116,15 @@ def recommend_jobs(request: RecommendJobsRequest):
     3. Returns list of links.
     """
     # 1. Extract Criteria
+    # 1. Extract Criteria
     criteria = extract_search_criteria(request.resume_text)
     
+    if "error" in criteria:
+        # Pass the error details to the client
+        raise HTTPException(status_code=500, detail=criteria["error"])
+    
     if not criteria or "query" not in criteria:
-        # Fallback if LLM fails
+        # Fallback if LLM fails silently or returns formatting garbage
         query = "Software Engineer jobs"
     else:
         query = criteria["query"]
