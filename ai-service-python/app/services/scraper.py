@@ -1,5 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def scrape_job_description(url: str) -> str:
     """
@@ -35,40 +39,109 @@ def scrape_job_description(url: str) -> str:
         print(f"Scraping Error: {e}")
         return ""
 
-from googlesearch import search
-import time
-
-def search_external_jobs(query: str, limit: int = 5) -> list:
+def search_external_jobs(query: str, limit: int = 10) -> list:
     """
-    Searches Google for job postings matching the query.
-    Returns a list of job objects.
+    Searches for jobs using multiple free job board APIs.
+    No rate limits, completely free.
     """
     results = []
+    
     try:
-        # Perform Google Search
-        # advanced=True returns SearchResult objects with title, description, url
-        search_results = search(query, num_results=limit, advanced=True)
+        # Option 1: Adzuna API (Free tier: 1000 calls/month)
+        # Sign up at: https://developer.adzuna.com/
+        adzuna_app_id = os.getenv("ADZUNA_APP_ID")
+        adzuna_api_key = os.getenv("ADZUNA_API_KEY")
         
-        for res in search_results:
-            results.append({
-                "id": str(hash(res.url)),
-                "title": res.title,
-                "company": "External Source", # Hard to parse from Google title reliably without NLP
-                "description": res.description,
-                "url": res.url,
-                "source": "Google Search"
-            })
+        if adzuna_app_id and adzuna_api_key:
+            try:
+                url = f"https://api.adzuna.com/v1/api/jobs/in/search/1"
+                params = {
+                    "app_id": adzuna_app_id,
+                    "app_key": adzuna_api_key,
+                    "results_per_page": limit,
+                    "what": query,
+                    "content-type": "application/json"
+                }
+                
+                response = requests.get(url, params=params, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    for job in data.get("results", []):
+                        results.append({
+                            "id": job.get("id", ""),
+                            "title": job.get("title", ""),
+                            "company": job.get("company", {}).get("display_name", "Unknown"),
+                            "description": job.get("description", "")[:200] + "...",
+                            "url": job.get("redirect_url", "#"),
+                            "source": "Adzuna"
+                        })
+                    return results
+            except Exception as e:
+                print(f"Adzuna API Error: {e}")
+        
+        # Option 2: The Muse API (Free, no key required)
+        try:
+            url = "https://www.themuse.com/api/public/jobs"
+            params = {
+                "page": 0,
+                "descending": True,
+                "api_key": "public",
+                "category": query.split()[0] if query else "Software Engineer"
+            }
+            
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                for job in data.get("results", [])[:limit]:
+                    results.append({
+                        "id": str(job.get("id", "")),
+                        "title": job.get("name", ""),
+                        "company": job.get("company", {}).get("name", "Unknown"),
+                        "description": (job.get("contents", "") or "No description")[:200] + "...",
+                        "url": job.get("refs", {}).get("landing_page", "#"),
+                        "source": "The Muse"
+                    })
+                return results
+        except Exception as e:
+            print(f"The Muse API Error: {e}")
+        
+        # Option 3: Remotive API (Free, remote jobs)
+        try:
+            url = "https://remotive.com/api/remote-jobs"
+            params = {
+                "search": query,
+                "limit": limit
+            }
+            
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                for job in data.get("jobs", [])[:limit]:
+                    results.append({
+                        "id": str(job.get("id", "")),
+                        "title": job.get("title", ""),
+                        "company": job.get("company_name", "Unknown"),
+                        "description": job.get("description", "")[:200] + "...",
+                        "url": job.get("url", "#"),
+                        "source": "Remotive"
+                    })
+                return results
+        except Exception as e:
+            print(f"Remotive API Error: {e}")
             
     except Exception as e:
-        print(f"Google Search Error: {e}")
-        # Fallback to mock data if quota exceeded or error
+        print(f"Job Search Error: {e}")
+    
+    # Fallback: Return helpful message if all APIs fail
+    if not results:
         return [
             {
-                "id": "err_1",
-                "title": "Error fetching real jobs",
+                "id": "setup_1",
+                "title": "Setup Required: Add Job API Keys",
                 "company": "System",
-                "description": "Please try again later. Google Search limit may have been reached.",
-                "url": "#"
+                "description": "To enable external job search, add ADZUNA_APP_ID and ADZUNA_API_KEY to your .env file. Sign up free at https://developer.adzuna.com/",
+                "url": "https://developer.adzuna.com/",
+                "source": "Setup Guide"
             }
         ]
         

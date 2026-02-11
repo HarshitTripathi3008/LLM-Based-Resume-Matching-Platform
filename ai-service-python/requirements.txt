@@ -7,5 +7,4 @@ python-dotenv
 requests
 scikit-learn
 beautifulsoup4
-googlesearch-python
 groq
