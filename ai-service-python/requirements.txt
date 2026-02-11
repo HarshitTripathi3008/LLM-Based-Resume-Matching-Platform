@@ -8,3 +8,4 @@ requests
 scikit-learn
 beautifulsoup4
 googlesearch-python
+groq

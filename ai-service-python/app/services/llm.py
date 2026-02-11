@@ -1,25 +1,72 @@
 import google.generativeai as genai
+from groq import Groq
 import os
 import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Gemini
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+# Configure API Keys
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Initialize clients
+groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+def call_llm(prompt: str, model_preference: str = "groq") -> str:
+    """
+    Calls LLM with automatic fallback.
+    Primary: Groq (fast, free)
+    Fallback: Gemini (reliable)
+    """
+    
+    # Try Groq first
+    if groq_client and model_preference == "groq":
+        try:
+            response = groq_client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are an expert HR AI assistant. Always return valid JSON without markdown formatting."},
+                    {"role": "user", "content": prompt}
+                ],
+                model="llama-3.3-70b-versatile",  # Fast and accurate
+                temperature=0.3,
+                max_tokens=2000
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"Groq failed: {e}. Falling back to Gemini...")
+    
+    # Fallback to Gemini
+    if GEMINI_API_KEY:
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(prompt)
+            return response.text.strip()
+        except Exception as e:
+            raise Exception(f"Both Groq and Gemini failed. Groq: {e}")
+    
+    raise Exception("No valid API keys configured")
+
+def clean_json_response(text: str) -> str:
+    """Remove markdown formatting from LLM response"""
+    if text.startswith("```json"):
+        text = text[7:]
+    if text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
 
 def analyze_resume_text(text: str) -> dict:
     """
-    Analyzes resume text using Gemini LLM and returns structured JSON.
+    Analyzes resume text using Groq (primary) or Gemini (fallback).
     """
-    if not api_key or "PLACEHOLDER" in api_key:
-        return {"error": "Gemini API Key is missing or invalid in .env"}
+    if not GROQ_API_KEY and not GEMINI_API_KEY:
+        return {"error": "No API keys configured"}
 
     try:
-        model = genai.GenerativeModel('gemini-flash-latest')
-        
         prompt = f"""
         You are an expert HR AI. Extract structured data from the following resume text.
         Return ONLY valid JSON. Do not include markdown formatting like ```json ... ```.
@@ -36,19 +83,9 @@ def analyze_resume_text(text: str) -> dict:
         RESUME TEXT:
         {text[:10000]} 
         """
-        # Truncate to 10k chars to stay within reasonable limits if file is huge
 
-        response = model.generate_content(prompt)
-        response_text = response.text.strip()
-        
-        # Clean cleanup if model returns markdown
-        if response_text.startswith("```json"):
-            response_text = response_text[7:]
-        if response_text.startswith("```"):
-            response_text = response_text[3:]
-        if response_text.endswith("```"):
-            response_text = response_text[:-3]
-            
+        response_text = call_llm(prompt, model_preference="groq")
+        response_text = clean_json_response(response_text)
         return json.loads(response_text)
 
     except Exception as e:
@@ -60,12 +97,10 @@ def extract_search_criteria(text: str) -> dict:
     Extracts criteria for searching external jobs.
     Returns: { "experience_level": str, "domain": str, "top_skills": list, "query": str }
     """
-    if not api_key:
-        return {"error": "Gemini API Key is missing on Server"}
+    if not GROQ_API_KEY and not GEMINI_API_KEY:
+        return {"error": "No API keys configured"}
 
     try:
-        model = genai.GenerativeModel('gemini-flash-latest')
-        
         prompt = f"""
         You are a job search assistant. Analyze the resume text below and extract:
         1. "experience_level": "Junior", "Mid-Level", "Senior", "Lead", or "Intern" (based on years of exp).
@@ -81,28 +116,10 @@ def extract_search_criteria(text: str) -> dict:
         Return ONLY valid JSON.
         """
         
-        response = model.generate_content(prompt)
-        response_text = response.text.strip()
-        
-        if response_text.startswith("```json"):
-            response_text = response_text[7:]
-        if response_text.startswith("```"):
-            response_text = response_text[3:]
-        if response_text.endswith("```"):
-            response_text = response_text[:-3]
-            
+        response_text = call_llm(prompt, model_preference="groq")
+        response_text = clean_json_response(response_text)
         return json.loads(response_text)
         
     except Exception as e:
         print(f"LLM Search Criteria Error: {e}")
-        
-        # Try to list available models to help debugging
-        try:
-            available = []
-            for m in genai.list_models():
-                if 'generateContent' in m.supported_generation_methods:
-                    available.append(m.name)
-            
-            return {"error": f"LLM Failed. Error: {str(e)}. AVAILABLE MODELS: {', '.join(available)}"}
-        except Exception as list_err:
-             return {"error": f"LLM Failed: {str(e)}. Also failed to list models: {str(list_err)}"}
+        return {"error": f"LLM Failed: {str(e)}"}
