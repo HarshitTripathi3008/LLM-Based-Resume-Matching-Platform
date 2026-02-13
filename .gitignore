@@ -2,7 +2,8 @@
 node_modules
 /backend-node/node_modules
 /ai-service-python/venv
-/ai-service-python/__pycache__
+/ai-service-python/venv
+__pycache__
 
 # Environment
 .env
