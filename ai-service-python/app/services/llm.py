@@ -107,13 +107,14 @@ def extract_search_criteria(text: str) -> dict:
         2. "domain": The primary role domain (e.g., "Frontend Developer", "Data Scientist", "DevOps Engineer").
         3. "degree": Highest degree (e.g., "Bachelors", "Masters", "PhD", or null).
         4. "top_skills": List of 3-5 most critical technical skills for their role.
-        5. "query": A precise Google Search query to find specific job listings for this candidate.
-           Example query: "Junior React Developer jobs in India" or "Senior Data Scientist remote jobs".
+        5. "query": A precise Google Search query to find specific job listings for this candidate in INDIA.
+           Example query: "Junior React Developer jobs in India" or "Senior Data Scientist jobs in Bangalore".
         
         RESUME TEXT:
         {text[:5000]}
         
-        Return ONLY valid JSON.
+        IMPORTANT: Return ONLY valid JSON. No markdown formatting.
+        If you cannot determine a field, use reasonable defaults based on the text.
         """
         
         response_text = call_llm(prompt, model_preference="groq")

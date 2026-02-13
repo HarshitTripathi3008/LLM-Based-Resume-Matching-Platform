@@ -50,6 +50,10 @@ def search_google_jobs(query: str, limit: int = 10) -> list:
         return []
 
     try:
+        # Enforce India context for better results
+        if "india" not in query.lower() and "remote" not in query.lower():
+            query += " in India"
+            
         params = {
             "engine": "google_jobs",
             "q": query,
