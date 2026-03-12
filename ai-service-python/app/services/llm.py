@@ -75,10 +75,14 @@ def analyze_resume_text(text: str) -> dict:
         1. "name": candidate name
         2. "email": candidate email
         3. "skills": list of technical and soft skills (strings)
-        4. "experience": list of objects with "title", "company", "years" (number, approx), "description"
-        5. "education": list of objects with "degree", "school", "year"
-        6. "summary": a brief professional summary (2-3 sentences)
-        7. "years_of_experience": total years of experience (number)
+        4. "experience": list of objects with "title", "company", "years" (number), "description". 
+           IMPORTANT: Only include PROFESSIONAL work (jobs, internships). Do NOT include personal or academic projects here.
+        5. "projects": list of objects with "title", "technologies", "description". 
+           IMPORTANT: Put all personal, academic, or group projects here. Do NOT include a "years" field for projects.
+        6. "education": list of objects with "degree", "school", "year"
+        7. "summary": a brief professional summary (2-3 sentences)
+        8. "years_of_experience": total years of professional work experience ONLY (number). 
+           CRITICAL: Do NOT include time spent on projects or education in this total.
 
         RESUME TEXT:
         {text[:10000]} 
@@ -104,7 +108,9 @@ def extract_search_criteria(text: str) -> dict:
         prompt = f"""
 You are a job search specialist. Analyze the resume below and extract structured job search data.
 
-STEP 1 — Count total years of professional experience from work history (not internships unless the person has no other experience).
+STEP 1 — Count total years of PROFESSIONAL work experience (jobs, internships). 
+         CRITICAL: Do NOT count personal projects, academic projects, or time spent in education.
+         A candidate with multiple projects but no actual job history should have 0 years of experience.
 
 STEP 2 — Map years_of_experience to experience_level using ONLY these strict rules:
   0–1 years → "Intern"

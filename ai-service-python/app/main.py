@@ -137,6 +137,32 @@ _DOMAIN_KEYWORDS = [
 ]
 
 
+# Prioritize these skills for search queries as they are more "niche" and lead to better hits
+_SEARCH_PRIORITY_SKILLS = [
+    "nodejs", "node.js", "react", "reactjs", "angular", "vue", "fastapi", "django", 
+    "spring", "flask", "docker", "kubernetes", "aws", "azure", "gcp", "devops",
+    "machine learning", "data science", "nlp", "blockchain", "solidity", "webrtc"
+]
+
+def _select_best_skill(skills: list) -> str:
+    """Select the most 'search-relevant' skill from a list."""
+    if not skills:
+        return ""
+    
+    # Check for priority skills first
+    for s in skills:
+        s_clean = s.lower().replace(" ", "")
+        if s_clean in _SEARCH_PRIORITY_SKILLS:
+            return s
+            
+    # Fallback to the first skill that isn't just a single character or common language
+    for s in skills:
+        if len(s) > 2: # Ignore 'C', 'C++', 'Java' (too common)
+            return s
+            
+    return skills[0] if skills else ""
+
+
 def _infer_domain(titles: list, skills: list) -> str:
     """
     Infer job domain from experience titles and skills.
@@ -212,16 +238,23 @@ def recommend_jobs(request: RecommendJobsRequest):
     top_skills = criteria.get("top_skills", [])
 
     # Use the single most relevant skill as a qualifier
-    skill_tag = top_skills[0] if top_skills else ""
+    skill_tag = _select_best_skill(top_skills)
     
-    # Simpler query for better hit rate
+    # Primary specific query
     if skill_tag:
-        # e.g. "Junior Node.js India" or "Intern React Bangalore"
         query = f"{level} {skill_tag} {domain} India"
     else:
         query = f"{level} {domain} India"
 
+    print(f"DEBUG: Primary query -> {query}")
     jobs = search_external_jobs(query, limit=10)
+
+    # Secondary broad fallback if primary fails
+    if not jobs or (len(jobs) == 1 and jobs[0].get("id") == "no_results"):
+        broader_query = f"{level} {domain} India"
+        print(f"DEBUG: Faling back to broader query -> {broader_query}")
+        jobs = search_external_jobs(broader_query, limit=10)
+        query = broader_query # record what actually worked
 
     return {
         "success": True,

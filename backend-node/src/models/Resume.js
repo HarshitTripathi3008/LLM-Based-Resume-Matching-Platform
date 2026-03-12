@@ -28,14 +28,21 @@ const resumeSchema = new mongoose.Schema({
         experience: [{
             title: String,
             company: String,
-            years: Number
+            years: Number,
+            description: String
+        }],
+        projects: [{
+            title: String,
+            technologies: [String],
+            description: String
         }],
         education: [{
             degree: String,
             school: String,
             year: String
         }],
-        summary: String
+        summary: String,
+        years_of_experience: Number
     },
     // Raw text content for indexing
     rawText: {
