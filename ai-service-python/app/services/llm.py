@@ -140,6 +140,8 @@ Return ONLY valid JSON in this exact format:
         
         response_text = call_llm(prompt, model_preference="groq")
         response_text = clean_json_response(response_text)
+        if not response_text or response_text.strip() == "":
+            raise ValueError("LLM returned an empty response. Check API keys and quota.")
         return json.loads(response_text)
         
     except Exception as e:

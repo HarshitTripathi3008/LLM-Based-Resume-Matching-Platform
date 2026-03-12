@@ -132,19 +132,37 @@ exports.getRecommendedJobs = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Resume not found' });
         }
 
-        // Use rawText or parsed data
-        let resumeText = resume.rawText || "";
-        if (!resumeText && resume.parsedData) {
-            resumeText = JSON.stringify(resume.parsedData);
+        // Prefer full structured parsedData; fall back to rawText
+        let resumeText = "";
+        if (resume.parsedData && Object.keys(resume.parsedData).length > 0) {
+            // Build a rich text representation from structured data
+            const p = resume.parsedData;
+            const skillsStr = (p.skills || []).join(', ');
+            const expStr = (p.experience || []).map(e => `${e.title} at ${e.company} (${e.years || 0} years)`).join('; ');
+            const eduStr = (p.education || []).map(e => `${e.degree} from ${e.school}`).join('; ');
+            resumeText = [
+                p.summary || '',
+                `Skills: ${skillsStr}`,
+                `Experience: ${expStr}`,
+                `Education: ${eduStr}`,
+                `Total experience years: ${p.years_of_experience || 0}`
+            ].join('\n');
+        } else if (resume.rawText) {
+            resumeText = resume.rawText;
         }
 
         if (!resumeText || resumeText.length < 10) {
             return res.status(400).json({ success: false, error: 'Resume text is empty. Please re-upload resume.' });
         }
 
-        // Call Python Service
+        // Call Python Service — send a plain-object version of parsedData
+        const plainParsed = resume.parsedData
+            ? JSON.parse(JSON.stringify(resume.parsedData))
+            : null;
+
         const response = await axios.post(`${AI_SERVICE_URL}/recommend-jobs`, {
-            resume_text: resumeText
+            resume_text: resumeText,
+            parsed_data: plainParsed
         });
 
         res.status(200).json({
