@@ -73,8 +73,13 @@ def search_google_jobs(query: str, limit: int = 10) -> list:
                     "title": job.get("title", ""),
                     "company": job.get("company_name", "Unknown"),
                     "description": job.get("description", "")[:200] + "...",
-                    "url": job.get("share_link", "#") or job.get("related_links", [{}])[0].get("link", "#"),
-                    "source": "Google Jobs (" + job.get("via", "Unknown") + ")", # e.g. "via Naukri"
+                    "url": (
+                        job.get("related_links", [{}])[0].get("link")
+                        or job.get("apply_options", [{}])[0].get("link")
+                        or job.get("share_link")
+                        or "#"
+                    ),
+                    "source": job.get("via", "View Job"),
                     "location": job.get("location", "")
                 })
     except Exception as e:

@@ -116,25 +116,44 @@ def recommend_jobs(request: RecommendJobsRequest):
     3. Returns list of links.
     """
     # 1. Extract Criteria
-    # 1. Extract Criteria
     criteria = extract_search_criteria(request.resume_text)
     
     if "error" in criteria:
-        # Pass the error details to the client
         raise HTTPException(status_code=500, detail=criteria["error"])
     
-    if not criteria or "query" not in criteria:
-        # Fallback if LLM fails silently or returns formatting garbage
-        query = "Software Engineer jobs"
+    # 2. Build a precise, experience-anchored query from structured fields.
+    #    This overrides the LLM query to guarantee experience level is respected.
+    level = criteria.get("experience_level", "Junior")
+    domain = criteria.get("domain", "Software Developer")
+    years = criteria.get("years_of_experience", 0)
+    top_skills = criteria.get("top_skills", [])
+
+    # Re-enforce the level based on years if the LLM got it wrong
+    if isinstance(years, (int, float)):
+        if years < 1:
+            level = "Intern"
+        elif years < 3:
+            level = "Junior"
+        elif years < 6:
+            level = "Mid-Level"
+        elif years < 10:
+            level = "Senior"
+        else:
+            level = "Lead"
+
+    # Build a concise but highly targeted query
+    skill_tag = top_skills[0] if top_skills else ""
+    if skill_tag:
+        query = f"{level} {skill_tag} {domain} jobs in India"
     else:
-        query = criteria["query"]
-        
-    # 2. Search Google
+        query = f"{level} {domain} jobs in India"
+
+    # Use scraper with experience-level-aware search
     jobs = search_external_jobs(query, limit=10)
     
     return {
         "success": True,
-        "criteria": criteria,
+        "criteria": {**criteria, "resolved_level": level, "final_query": query},
         "data": jobs
     }
 

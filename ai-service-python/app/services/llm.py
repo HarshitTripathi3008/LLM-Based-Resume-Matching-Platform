@@ -95,27 +95,48 @@ def analyze_resume_text(text: str) -> dict:
 def extract_search_criteria(text: str) -> dict:
     """
     Extracts criteria for searching external jobs.
-    Returns: { "experience_level": str, "domain": str, "top_skills": list, "query": str }
+    Returns: { "experience_level": str, "domain": str, "years_of_experience": int, "top_skills": list, "query": str }
     """
     if not GROQ_API_KEY and not GEMINI_API_KEY:
         return {"error": "No API keys configured"}
 
     try:
         prompt = f"""
-        You are a job search assistant. Analyze the resume text below and extract:
-        1. "experience_level": "Junior", "Mid-Level", "Senior", "Lead", or "Intern" (based on years of exp).
-        2. "domain": The primary role domain (e.g., "Frontend Developer", "Data Scientist", "DevOps Engineer").
-        3. "degree": Highest degree (e.g., "Bachelors", "Masters", "PhD", or null).
-        4. "top_skills": List of 3-5 most critical technical skills for their role.
-        5. "query": A precise Google Search query to find specific job listings for this candidate in INDIA.
-           Example query: "Junior React Developer jobs in India" or "Senior Data Scientist jobs in Bangalore".
-        
-        RESUME TEXT:
-        {text[:5000]}
-        
-        IMPORTANT: Return ONLY valid JSON. No markdown formatting.
-        If you cannot determine a field, use reasonable defaults based on the text.
-        """
+You are a job search specialist. Analyze the resume below and extract structured job search data.
+
+STEP 1 — Count total years of professional experience from work history (not internships unless the person has no other experience).
+
+STEP 2 — Map years_of_experience to experience_level using ONLY these strict rules:
+  0–1 years → "Intern"
+  1–3 years → "Junior"
+  3–6 years → "Mid-Level"
+  6–10 years → "Senior"
+  10+ years  → "Lead"
+
+STEP 3 — Identify the primary job domain (e.g., "Frontend Developer", "Data Scientist", "Backend Engineer", "Full Stack Developer").
+
+STEP 4 — Extract the 3–5 most relevant technical skills for their domain.
+
+STEP 5 — Build a concise, experience-appropriate Google Search query for jobs in INDIA.
+  - The query MUST include the experience_level prefix (e.g., "Junior", "Mid-Level").
+  - Keep the query SHORT and precise (no more than 7 words).
+  - Target India specifically (e.g., "in India" or "Bangalore" or "Remote India").
+  - DO NOT include skills that over-qualify the candidate.
+  - Example for 2 years experience: "Junior React Developer jobs in India"
+  - Example for 4 years: "Mid-Level Full Stack Developer Bangalore"
+
+RESUME TEXT:
+{text[:6000]}
+
+Return ONLY valid JSON in this exact format:
+{{
+  "years_of_experience": <integer>,
+  "experience_level": "Junior",
+  "domain": "Frontend Developer",
+  "top_skills": ["React", "JavaScript", "CSS"],
+  "query": "Junior Frontend Developer jobs in India"
+}}
+"""
         
         response_text = call_llm(prompt, model_preference="groq")
         response_text = clean_json_response(response_text)

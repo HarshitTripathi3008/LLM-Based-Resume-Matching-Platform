@@ -93,12 +93,15 @@ async function loadDashboardData() {
 
         renderResumeList(); // Dashboard list
 
-        // Fetch Recommendations if resumes exist (Populates container in Jobs Page)
+        // Populate the resume selector on the jobs page
+        populateResumeSelector();
+
+        // Fetch Recommendations if resumes exist
         if (state.resumes.length > 0) {
             loadRecommendedJobs(state.resumes[0]._id);
         } else {
             const container = document.getElementById('external-jobs-container');
-            if (container) container.innerHTML = '<p>Upload a resume to get external job recommendations.</p>';
+            if (container) container.innerHTML = '<p style="color: var(--text-muted); padding: 20px 0;">Upload a resume to get external job recommendations.</p>';
         }
 
     } catch (e) {
@@ -119,15 +122,15 @@ async function loadRecommendedJobs(resumeId) {
         }
 
         container.innerHTML = res.data.map(job => `
-            <div class="glass-card job-item external-job">
+            <div class="glass-card job-card">
                 <div class="job-header">
-                    <h3>${job.title}</h3>
+                    <h4>${job.title}</h4>
                     <span class="badge-external">External</span>
                 </div>
-                <p class="company">${job.company}</p>
-                <p class="desc">${job.description}</p>
-                <div class="actions">
-                    <a href="${job.url}" target="_blank" class="btn-secondary btn-sm">Apply on ${job.source}</a>
+                <p class="company">${job.company}${job.location ? ' &middot; ' + job.location : ''}</p>
+                <p class="job-description">${job.description}</p>
+                <div class="job-footer">
+                    <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="btn-apply">Apply on ${job.source}</a>
                 </div>
             </div>
         `).join('');
@@ -239,6 +242,26 @@ window.app = {
     }
 };
 
+// --- Resume Selector ---
+function populateResumeSelector() {
+    const select = document.getElementById('resume-select');
+    if (!select) return;
+
+    // Save currently selected value
+    const current = select.value;
+
+    // Rebuild options
+    select.innerHTML = state.resumes.map((r, i) =>
+        `<option value="${r._id}" ${i === 0 && !current ? 'selected' : ''} ${r._id === current ? 'selected' : ''}>
+            ${r.originalName}
+        </option>`
+    ).join('');
+
+    if (state.resumes.length === 0) {
+        select.innerHTML = '<option value="">No resumes uploaded</option>';
+    }
+}
+
 // --- Event Listeners ---
 function setupEventListeners() {
     // Nav
@@ -251,6 +274,18 @@ function setupEventListeners() {
             if (page === 'jobs') { renderJobList(); }
             if (page === 'resumes') { renderMyResumesPage(); }
         });
+    });
+
+    // Resume Selector — change selection
+    document.getElementById('resume-select').addEventListener('change', (e) => {
+        const resumeId = e.target.value;
+        if (resumeId) loadRecommendedJobs(resumeId);
+    });
+
+    // Resume Selector — Refresh button
+    document.getElementById('refresh-recommendations').addEventListener('click', () => {
+        const resumeId = document.getElementById('resume-select').value;
+        if (resumeId) loadRecommendedJobs(resumeId);
     });
 
     // Back Button in Match View

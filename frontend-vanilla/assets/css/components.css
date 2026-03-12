@@ -1,3 +1,55 @@
+/* Resume Selector Bar */
+.resume-selector-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    border-radius: 14px;
+    flex-wrap: wrap;
+}
+
+.resume-selector-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.resume-selector-info label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+#resume-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-main);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-family: 'Space Grotesk', sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 220px;
+    max-width: 340px;
+}
+
+#resume-select:focus,
+#resume-select:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+#resume-select option {
+    background: #1e293b;
+    color: var(--text-main);
+}
+
 .resume-item {
     display: flex;
     justify-content: space-between;
@@ -276,6 +328,31 @@
 .job-footer .btn-primary {
     padding: 10px 20px;
     font-size: 0.85rem;
+}
+
+/* External Job Apply Button */
+.btn-apply {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);
+}
+
+.btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(6, 182, 212, 0.45);
+    color: #fff;
+    filter: brightness(1.1);
 }
 
 .drop-zone {
