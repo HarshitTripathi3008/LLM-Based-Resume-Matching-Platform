@@ -196,13 +196,21 @@ def search_external_jobs(query: str, limit: int = 10) -> list:
     
     # Fallback: Return helpful message if all APIs fail
     if not results:
+        api_key = os.getenv("SERPAPI_KEY")
+        adzuna_id = os.getenv("ADZUNA_APP_ID")
+        
+        if not api_key and not adzuna_id:
+            message = "Please ensure SERPAPI_KEY or ADZUNA_APP_ID is set in .env to fetch jobs."
+        else:
+            message = f"No jobs found matching your criteria in India. Try refreshing or selecting a different resume."
+
         return [
             {
-                "id": "setup_1",
-                "title": "No Jobs Found / Setup Required",
+                "id": "no_results",
+                "title": "No Matching Jobs Found",
                 "company": "System",
-                "description": "Please ensure SERPAPI_KEY or ADZUNA_APP_ID is set in .env to fetch jobs.",
-                "url": "https://serpapi.com/",
+                "description": message,
+                "url": "#",
                 "source": "System Message"
             }
         ]

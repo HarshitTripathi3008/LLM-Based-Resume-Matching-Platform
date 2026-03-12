@@ -205,18 +205,21 @@ def recommend_jobs(request: RecommendJobsRequest):
                 "top_skills": [],
             }
 
-    # --- Build an experience-anchored, precise search query ---
+    # Build an experience-anchored, precise search query
     years = criteria.get("years_of_experience", 0)
-    level = _years_to_level(float(years) if years else 0)  # always recompute from numbers
+    level = _years_to_level(float(years) if years else 0)
     domain = criteria.get("domain", "Software Developer")
     top_skills = criteria.get("top_skills", [])
 
-    # Use the single most relevant skill as a qualifier, not just the first in the list
+    # Use the single most relevant skill as a qualifier
     skill_tag = top_skills[0] if top_skills else ""
+    
+    # Simpler query for better hit rate
     if skill_tag:
-        query = f"{level} {skill_tag} {domain} jobs in India"
+        # e.g. "Junior Node.js India" or "Intern React Bangalore"
+        query = f"{level} {skill_tag} {domain} India"
     else:
-        query = f"{level} {domain} jobs in India"
+        query = f"{level} {domain} India"
 
     jobs = search_external_jobs(query, limit=10)
 
