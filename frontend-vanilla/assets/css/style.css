@@ -1,18 +1,22 @@
 :root {
-    /* Cyberpunk / Space Theme */
-    --bg-dark: #0a0a12;
-    --text-main: #ffffff;
-    --text-muted: #a0a0b0;
+    /* Premium Slate & Indigo Palette */
+    --bg-dark: #030712;
+    --bg-card: rgba(17, 24, 39, 0.7);
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
     
-    --primary: #6c5ce7; /* Soft Purple */
-    --primary-glow: rgba(108, 92, 231, 0.4);
+    --primary: #6366f1; /* Indigo 500 */
+    --primary-light: #818cf8;
+    --primary-glow: rgba(99, 102, 241, 0.3);
     
-    --secondary: #00cec9; /* Cyan */
-    --accent: #fd79a8; /* Pink */
+    --secondary: #06b6d4; /* Cyan 500 */
+    --accent: #f43f5e; /* Rose 500 */
     
-    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-blur: 10px;
+    --glass-blur: 16px;
+
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -28,9 +32,10 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
+    line-height: 1.6;
 }
 
-/* Background Ambient Orbs */
+/* Enhanced Background Ambient Orbs */
 .background-globes {
     position: fixed;
     top: 0;
@@ -39,36 +44,38 @@ body {
     height: 100%;
     z-index: -1;
     overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, #111827 0%, #030712 100%);
 }
 
 .globe {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.6;
+    filter: blur(120px);
+    opacity: 0.4;
 }
 
 .globe-1 {
-    width: 400px;
-    height: 400px;
-    background: var(--primary);
-    top: -100px;
-    left: -100px;
-    animation: float 10s infinite alternate;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    top: -200px;
+    left: -150px;
+    animation: float 15s infinite ease-in-out;
 }
 
 .globe-2 {
-    width: 500px;
-    height: 500px;
-    background: var(--secondary);
-    bottom: -150px;
-    right: -150px;
-    animation: float 12s infinite alternate-reverse;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+    bottom: -250px;
+    right: -200px;
+    animation: float 20s infinite ease-in-out reverse;
 }
 
 @keyframes float {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(30px, 50px); }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, 60px) scale(1.1); }
+    66% { transform: translate(-20px, 30px) scale(0.9); }
 }
 
 #app {
@@ -80,6 +87,24 @@ body {
     flex-direction: column;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-light);
+}
+
 /* Utilities */
 .hidden { display: none !important; }
 
@@ -87,9 +112,48 @@ header.page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    gap: 20px;
 }
 
-h1, h2, h3 { font-weight: 700; letter-spacing: -0.5px; }
-a { color: var(--secondary); text-decoration: none; cursor: pointer; }
-a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; }
+a { color: var(--secondary); text-decoration: none; cursor: pointer; transition: var(--transition); }
+a:hover { color: var(--primary-light); }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    nav {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 16px;
+        top: 10px;
+    }
+
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .nav-links a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+
+    header.page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+    }
+
+    .job-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
+}

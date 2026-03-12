@@ -38,12 +38,22 @@ async function init() {
 // --- Navigation ---
 function navigate(pageName) {
     // Hide all pages
-    Object.values(pages).forEach(el => el.classList.add('hidden'));
+    Object.values(pages).forEach(el => {
+        el.classList.add('hidden');
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+    });
     document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
 
     // Show target
     if (pages[pageName]) {
         pages[pageName].classList.remove('hidden');
+        // Simple entrance animation
+        setTimeout(() => {
+            pages[pageName].style.transition = 'all 0.4s ease-out';
+            pages[pageName].style.opacity = '1';
+            pages[pageName].style.transform = 'translateY(0)';
+        }, 10);
         const link = document.querySelector(`[data-page="${pageName}"]`);
         if (link) link.classList.add('active');
     }
@@ -132,8 +142,8 @@ function renderResumeList() {
     // Dashboard Mini List
     const list = document.getElementById('dashboard-resume-list');
     list.innerHTML = state.resumes.slice(0, 3).map(r => `
-        <div class="glass-card resume-item">
-            <div>
+        <div class="resume-item">
+            <div class="resume-info">
                 <h4>${r.originalName}</h4>
                 <small>${new Date(r.createdAt).toLocaleDateString()}</small>
             </div>
@@ -150,14 +160,14 @@ function renderMyResumesPage() {
     }
 
     list.innerHTML = state.resumes.map((r, index) => `
-        <div class="glass-card resume-item full-width">
+        <div class="resume-item full-width">
             <div class="resume-info">
                 <h4>${r.originalName} ${index === 0 ? '<span class="badge-new">Latest</span>' : ''}</h4>
                 <small>Uploaded: ${new Date(r.createdAt).toLocaleString()}</small>
             </div>
             <div class="resume-actions">
                 <span class="badg ${r.status}">${r.status}</span>
-                <button class="btn-danger btn-sm" onclick="app.deleteResume('${r._id}')">Delete</button>
+                <button class="btn-danger" onclick="app.deleteResume('${r._id}')">Delete</button>
             </div>
         </div>
     `).join('');
@@ -166,12 +176,14 @@ function renderMyResumesPage() {
 function renderJobList() {
     const list = document.getElementById('job-list');
     list.innerHTML = state.jobs.map(j => `
-        <div class="glass-card job-item">
-            <h3>${j.title}</h3>
+        <div class="glass-card job-card">
+            <div class="job-header">
+                <h4>${j.title}</h4>
+            </div>
             <p class="company">${j.company}</p>
-            <p class="desc">${j.description.substring(0, 100)}...</p>
-            <div class="actions">
-                <button class="btn-secondary btn-sm" onclick="app.matchJob('${j._id}', '${j.title}')">✨ Find Matches</button>
+            <p class="job-description">${j.description.substring(0, 100)}...</p>
+            <div class="job-footer">
+                <button class="btn-primary" onclick="app.matchJob('${j._id}', '${j.title}')">✨ Find Matches</button>
             </div>
         </div>
     `).join('');
@@ -193,13 +205,17 @@ window.app = {
             }
 
             container.innerHTML = res.candidates.map(c => `
-                <div class="glass-card match-item">
+                <div class="match-item">
                     <div class="score-circle" style="--percent:${c.score * 100}">
                         <span>${Math.round(c.score * 100)}%</span>
                     </div>
                     <div class="match-info">
                         <h4>${c.resume.originalName}</h4>
-                        <p class="missing-keywords">Missing: ${c.missing_keywords.join(', ') || 'None! Perfect Match'}</p>
+                        <div class="missing-keywords">
+                            ${c.missing_keywords.length > 0 
+                                ? c.missing_keywords.map(kw => `<span>${kw}</span>`).join('') 
+                                : '<span>Perfect Match!</span>'}
+                        </div>
                     </div>
                     <button class="btn-primary">Contact</button>
                 </div>
