@@ -183,7 +183,7 @@ function renderJobList() {
             <p class="company">${j.company}</p>
             <p class="job-description">${j.description.substring(0, 100)}...</p>
             <div class="job-footer">
-                <button class="btn-primary" onclick="app.matchJob('${j._id}', '${j.title}')">✨ Find Matches</button>
+                <button class="btn-primary" onclick="app.matchJob('${j._id}', '${j.title}')">Find Matches</button>
             </div>
         </div>
     `).join('');
@@ -322,9 +322,12 @@ function setupEventListeners() {
     });
 
     // File Upload Handler
+    let isUploading = false;
     document.getElementById('resume-file').addEventListener('change', async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || isUploading) return;
+
+        isUploading = true;
 
         // Show Progress
         document.getElementById('drop-zone').classList.add('hidden');
@@ -345,6 +348,7 @@ function setupEventListeners() {
         } catch (err) {
             alert('Upload Failed: ' + err.message);
         } finally {
+            isUploading = false;
             // Reset Modal
             document.getElementById('drop-zone').classList.remove('hidden');
             document.getElementById('upload-progress').classList.add('hidden');
