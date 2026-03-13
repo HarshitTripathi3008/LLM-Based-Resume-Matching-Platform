@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "serverless": "^4.33.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^14.5.0",
+    "serverless-offline-python": "^3.22.3",
+    "serverless-s3-sync": "^3.5.1"
+  }
+}

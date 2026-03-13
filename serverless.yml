@@ -1,0 +1,78 @@
+service: resume-matching-v2
+configValidationMode: error
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  stage: ${opt:stage, 'dev'}
+  architecture: x86_64
+  timeout: 30
+  environment:
+    MONGO_URI: ${env:MONGO_URI}
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRE: ${env:JWT_EXPIRE}
+    AI_SERVICE_URL: ${env:AI_SERVICE_URL}
+    AWS_BUCKET_NAME: ${env:AWS_BUCKET_NAME}
+    S3_RESUME_FOLDER: ${env:S3_RESUME_FOLDER}
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+    GEMINI_API_KEY: ${env:GEMINI_API_KEY}
+    GROQ_API_KEY: ${env:GROQ_API_KEY}
+    SERPAPI_KEY: ${env:SERPAPI_KEY}
+
+functions:
+  backend:
+    handler: backend-node/lambda.handler
+    events:
+      - httpApi: '*'
+
+  ai-service:
+    image: 937566678613.dkr.ecr.eu-north-1.amazonaws.com/serverless-resume-matching-v2-dev:latest
+    memorySize: 2048
+    events:
+      - httpApi:
+          method: '*'
+          path: /ai/{proxy+}
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-s3-sync
+
+custom:
+  s3Sync:
+    - bucketName: resume-match-v2-web-937566678613
+      localDir: frontend-vanilla
+
+resources:
+  Resources:
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: resume-match-v2-web-937566678613
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+
+    FrontendBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref FrontendBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: !Join ["", ["arn:aws:s3:::", !Ref FrontendBucket, "/*"]]
+
+  Outputs:
+    FrontendUrl:
+      Value: !GetAtt FrontendBucket.WebsiteURL
+      Description: "Frontend Website URL"
+

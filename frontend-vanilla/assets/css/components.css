@@ -68,7 +68,7 @@
     border-color: var(--primary-light);
 }
 
-.badg {
+.badge {
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.75rem;

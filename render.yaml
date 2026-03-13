@@ -1,27 +1,7 @@
 services:
-  # 1. Node.js Backend Service
-  - type: web
-    name: resume-backend-node
-    env: node
-    buildCommand: cd backend-node && npm install
-    startCommand: cd backend-node && node server.js
-    envVars:
-      - key: MONGO_URI
-        sync: false
-      - key: JWT_SECRET
-        generateValue: true
-      - key: AI_SERVICE_URL
-        fromService:
-          type: web
-          name: resume-ai-service
-          property: hostport
-
-  # 2. Python AI Service
-  - type: web
-    name: resume-ai-service
-    env: python
-    buildCommand: cd ai-service-python && pip install -r requirements.txt
-    startCommand: cd ai-service-python && uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: GEMINI_API_KEY
-        sync: false
+  - type: static
+    name: resume-matching-frontend
+    env: static
+    buildCommand: "" # No build step for vanilla HTML/JS
+    publishPath: frontend-vanilla
+    autoDeploy: true

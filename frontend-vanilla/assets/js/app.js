@@ -18,9 +18,50 @@ const pages = {
 
 const nav = document.getElementById('navbar');
 
+// --- Google Login Handler ---
+window.handleGoogleLogin = async (response) => {
+    try {
+        const res = await api.googleLogin(response.credential);
+        localStorage.setItem('token', res.token);
+        state.user = res.user;
+        showDashboard();
+    } catch (err) {
+        console.error('Login Failed:', err);
+        alert('Login failed: ' + err.message);
+    }
+};
+
+async function initGoogleLogin() {
+    try {
+        const res = await api.getGoogleConfig();
+        const clientId = res.data.clientId;
+
+        if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+            console.warn('Google Client ID not configured on backend.');
+            return;
+        }
+
+        google.accounts.id.initialize({
+            client_id: clientId,
+            callback: window.handleGoogleLogin
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("google-login-container"),
+            { theme: "outline", size: "large", text: "signin_with" }
+        );
+    } catch (err) {
+        console.error('Failed to initialize Google Login:', err);
+    }
+}
+
 // --- Initialization ---
 async function init() {
     const token = localStorage.getItem('token');
+    
+    // Always initialize Google Login on start (or when on auth page)
+    initGoogleLogin();
+
     if (token) {
         try {
             const res = await api.getMe();
@@ -150,7 +191,7 @@ function renderResumeList() {
                 <h4>${r.originalName}</h4>
                 <small>${new Date(r.createdAt).toLocaleDateString()}</small>
             </div>
-            <span class="badg ${r.status}">${r.status}</span>
+            <span class="badge ${r.status}">${r.status}</span>
         </div>
     `).join('');
 }
@@ -169,7 +210,7 @@ function renderMyResumesPage() {
                 <small>Uploaded: ${new Date(r.createdAt).toLocaleString()}</small>
             </div>
             <div class="resume-actions">
-                <span class="badg ${r.status}">${r.status}</span>
+                <span class="badge ${r.status}">${r.status}</span>
                 <button class="btn-danger" onclick="app.deleteResume('${r._id}')">Delete</button>
             </div>
         </div>
@@ -295,46 +336,7 @@ function setupEventListeners() {
 
     document.getElementById('logout-btn').addEventListener('click', logout);
 
-    // Auth Forms
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const res = await api.login({ email, password });
-            localStorage.setItem('token', res.token);
-            await init();
-        } catch (err) {
-            alert(err.message);
-        }
-    });
-
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('reg-name').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
-
-        try {
-            const res = await api.register({ name, email, password });
-            localStorage.setItem('token', res.token);
-            await init();
-        } catch (err) {
-            alert(err.message);
-        }
-    });
-
-    // Toggle Auth
-    document.getElementById('show-register').addEventListener('click', () => {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-    });
-
-    document.getElementById('show-login').addEventListener('click', () => {
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('login-form').classList.remove('hidden');
-    });
+    // Auth Forms (Removed legacy listeners as we use Google Login)
 
     // --- Upload Modal ---
     const uploadModal = document.getElementById('upload-modal');

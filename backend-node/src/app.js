@@ -6,14 +6,15 @@ const morgan = require('morgan');
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(express.json());
-
-// CORS Configuration
+// 1. CORS MUST BE FIRST for Cloud/Lambda preflights
 const allowedOrigins = [
+    'http://resume-match-v2-web-937566678613.s3-website.eu-north-1.amazonaws.com',
     'https://resume-platform-frontend.onrender.com',
+    'https://llm-based-resume-matching-platform.onrender.com',
     'http://127.0.0.1:5500',
+    'http://127.0.0.1:5501',
     'http://localhost:5500',
+    'http://localhost:5501',
     'http://localhost:3000'
 ];
 
@@ -29,7 +30,16 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(helmet());
+
+// 2. Body Parser
+app.use(express.json());
+
+// Relax Helmet for Google OAuth
+app.use(helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 app.use(morgan('dev'));
 
 // Basic Route
@@ -41,9 +51,11 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
 const jobRoutes = require('./routes/jobRoutes');
+const configRoutes = require('./routes/configRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/config', configRoutes);
 
 module.exports = app;

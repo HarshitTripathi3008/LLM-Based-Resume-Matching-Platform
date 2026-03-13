@@ -30,8 +30,9 @@ const storage = multerS3({
         cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-        // file_fieldname-timestamp.ext
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        // resumes/file_fieldname-timestamp.ext
+        const folder = process.env.S3_RESUME_FOLDER || 'resumes';
+        cb(null, `${folder}/${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 

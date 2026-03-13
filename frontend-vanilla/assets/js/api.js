@@ -1,5 +1,5 @@
 // API Config
-const API_BASE_URL = 'https://llm-based-resume-matching-platform.onrender.com/api';
+const API_BASE_URL = 'https://ij4uir11lh.execute-api.eu-north-1.amazonaws.com';
 
 // Helper for Fetch requests
 async function request(endpoint, method = 'GET', body = null, isFile = false) {
@@ -35,8 +35,7 @@ async function request(endpoint, method = 'GET', body = null, isFile = false) {
 
 export const api = {
     // Auth
-    login: (creds) => request('/auth/login', 'POST', creds),
-    register: (creds) => request('/auth/register', 'POST', creds),
+    googleLogin: (idToken) => request('/auth/google', 'POST', { idToken }),
     getMe: () => request('/auth/me'),
 
     // Resumes
@@ -46,7 +45,6 @@ export const api = {
 
     // Jobs
     createJob: (data) => request('/jobs', 'POST', data),
-    createJob: (data) => request('/jobs', 'POST', data),
     getJobs: () => request('/jobs'),
     matchJob: (id) => request(`/jobs/${id}/match`),
 
@@ -54,5 +52,9 @@ export const api = {
     getRecommendedJobs: (resumeId) => request('/jobs/recommend', 'POST', { resumeId }),
 
     // Delete
-    deleteResume: (id) => request(`/resumes/${id}`, 'DELETE')
+    deleteResume: (id) => request(`/resumes/${id}`, 'DELETE'),
+
+    // Config
+    getGoogleConfig: () => request('/config/google')
 };
+
