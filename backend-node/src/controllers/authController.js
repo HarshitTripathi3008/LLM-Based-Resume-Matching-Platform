@@ -2,7 +2,7 @@ const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 // Generate JWT
 const generateToken = (id) => {
@@ -22,11 +22,29 @@ exports.googleLogin = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Please provide a Google ID token' });
         }
 
+        const clientId = process.env.GOOGLE_CLIENT_ID;
+        if (!clientId) {
+            console.error('GOOGLE_CLIENT_ID is not defined in environment variables');
+            return res.status(500).json({ success: false, error: 'Server configuration error' });
+        }
+
+        const client = new OAuth2Client(clientId);
+
         // Verify Google Token
-        const ticket = await client.verifyIdToken({
-            idToken,
-            audience: process.env.GOOGLE_CLIENT_ID,
-        });
+        let ticket;
+        try {
+            ticket = await client.verifyIdToken({
+                idToken,
+                audience: clientId,
+            });
+        } catch (verifyError) {
+            console.error('Token verification failed:', verifyError.message);
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Invalid Google token', 
+                details: verifyError.message 
+            });
+        }
 
         const payload = ticket.getPayload();
         const { sub: googleId, email, name, picture } = payload;
