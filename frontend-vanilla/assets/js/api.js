@@ -1,5 +1,5 @@
 // API Config
-const API_BASE_URL = 'https://ij4uir11lh.execute-api.eu-north-1.amazonaws.com';
+const API_BASE_URL = 'https://ij4uir11lh.execute-api.eu-north-1.amazonaws.com/api';
 
 // Helper for Fetch requests
 async function request(endpoint, method = 'GET', body = null, isFile = false) {
